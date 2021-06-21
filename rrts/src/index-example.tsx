@@ -1,0 +1,44 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+interface AppProps {
+  color: string;
+}
+
+interface AppState {
+  counter: number;
+}
+
+class App extends React.Component<AppProps, AppState> {
+  // As property (won't use AppState):
+  // state = { counter: 0 };
+
+  constructor(props: AppProps) {
+    super(props);
+
+    // As statement:
+    this.state = { counter: 0 };
+  }
+
+  onIncrement = (): void => {
+    this.setState({ counter: this.state.counter + 1 });
+  };
+
+  onDecrement = (): void => {
+    this.setState({ counter: this.state.counter - 1 });
+  };
+
+  render() {
+    return (
+      <div>
+        {this.props.color}
+        <br />
+        <button onClick={this.onIncrement}>Increment</button>
+        <button onClick={this.onDecrement}>Decrement</button>
+        {this.state.counter}
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(<App color="red" />, document.getElementById('root'));
