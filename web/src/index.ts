@@ -1,9 +1,20 @@
-import { User } from './models/User';
+import { Collection } from './models/Collection';
+import { User, UserProps } from './models/User';
+import { UserList } from './views/UserList';
 
-const user = new User({ name: 'Henrique', age: 20 });
+const users = new Collection<User, UserProps>(
+  'http://localhost:3000/users',
+  (json: UserProps) => {
+    return User.buildUser(json);
+  }
+);
 
-user.on('change', () => {
-  console.log('Change # 1');
+users.on('change', () => {
+  const root = document.getElementById('root');
+
+  if (root) {
+    new UserList(root, users).render();
+  }
 });
 
-user.trigger('change');
+users.fetch();

@@ -1,40 +1,49 @@
-interface UserProps {
+import { Model } from './Model';
+import { Attributes } from './Attributes';
+import { ApiSync } from './ApiSync';
+import { Eventing } from './Eventing';
+import { Collection } from './Collection';
+
+export interface UserProps {
+  id?: number;
   name?: string;
   age?: number;
 }
 
-// Function that may have params & doesn't return anything
-type Callback = () => void;
+const rootUrl = 'http://localhost:3000/users';
 
-export class User {
-  // Object key type
-  events: { [key: string]: Callback[] } = {};
-
-  constructor(private data: UserProps) {}
-
-  get(propName: string): string | number {
-    return this.data[propName];
+export class User extends Model<UserProps> {
+  static buildUser(attrs: UserProps): User {
+    return new User(
+      new Attributes<UserProps>(attrs),
+      new Eventing(),
+      new ApiSync<UserProps>(rootUrl)
+    );
   }
 
-  set(update: UserProps): void {
-    Object.assign(this.data, update);
+  // This is useful because one could now implement thing such as
+  /*
+  static buildLocalUser(attrs) {
+    return new User(
+      new Attributes(attrs),
+      new Eventing(),
+      new LOCALSYNC()
+    )
+  }
+  */
+
+  static buildUserCollection(): Collection<User, UserProps> {
+    return new Collection<User, UserProps>(rootUrl, (json: UserProps) =>
+      User.buildUser(json)
+    );
   }
 
-  on(eventName: string, callback: Callback): void {
-    const handlers = this.events[eventName] || [];
-    handlers.push(callback);
-    this.events[eventName] = handlers;
+  isAdminUser(): boolean {
+    return this.get('id') === 1;
   }
 
-  trigger(eventName: string): void {
-    const handlers = this.events[eventName];
-
-    if (!handlers || handlers.length === 0) {
-      return;
-    }
-
-    handlers.forEach((callback) => {
-      callback();
-    });
+  setRandomAge(): void {
+    const age = Math.round(Math.random() * 200);
+    this.set({ age });
   }
 }
